@@ -4,7 +4,18 @@ const postsRouter = require("../routers/posts");
 
 //index
 function index(req, res){
-    res.json(postsData);
+    //definisco una query SQL che serve per selezionare tutti i dati dalla tabella "posts" nel db
+    const sql = 'SELECT * FROM posts';
+    //la funzione connection.query viene utilizata per eseguire la query SQL sul database
+    //do 2 parametri: sql (che è la query SQL da eseguire) e err, results (che gestisce il risultato della query)
+    connection.query(sql, (err, results) => {
+        //gestisco l'errore
+        if (err) return res.status(500).json({ err: 'Query failed' });
+        //altrimenti (se la query ha successo) stampo i risultati in console
+        console.log(results);
+        //i risultati della query vengono inviati come risposta JSON al client
+        res.json(results);
+    })
 }
 
 //show
