@@ -1,6 +1,6 @@
-const posts = require("../data/postsData");
 const postsData = require("../data/postsData");
 const postsRouter = require("../routers/posts");
+const connection = require('../data/db');
 
 //index
 function index(req, res){
@@ -84,7 +84,14 @@ function modify(req, res){
 //destroy
 function destroy(req, res){
     const postId = Number(req.params.id);
-    // cerco il post con l'id passato
+    const sql = 'DELETE FROM posts WHERE id = ?';
+
+    connection.query(sql, [postId], (err) => {
+        if (err) return res.status(500).json({ error: 'Query failed' })
+        res.sendStatus(204);
+    })
+
+/*     // cerco il post con l'id passato
     const post = postsData.find(post => post.id === postId);
     // imposto il 404 se il post cercato non esiste
     if (!post) {
@@ -93,7 +100,7 @@ function destroy(req, res){
     //rimuovo il post dall'array
     postsData.splice(postsData.indexOf(post), 1);
     res.status(204)
-    console.log(post)
+    console.log(post) */
 }
 
 module.exports = { index, show, store, update, modify, destroy };
