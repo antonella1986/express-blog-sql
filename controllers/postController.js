@@ -21,11 +21,35 @@ function index(req, res){
 //show
 function show(req, res){
     const postId = Number(req.params.id);
-    //cerco il l'id che mi interessa dentro postData (l'array di oggetti)
+    const sql = 'SELECT * FROM posts WHERE id = ?'
+
+    const sqlJoin = `
+    SELECT tags.label
+    FROM post_tag
+    JOIN tags ON post_tag.tag_id = tags.id
+    WHERE post_tag.post_id = ?
+    `
+    connection.query(sql, [postId], (err, postResults) => {
+        if (err) return res.status(500).json ({ message: 'Query failed' })
+        if (postResults.lenght === 0) return res.status(404).json ({ message: 'Post not found' })
+        
+        const post = postResults[0]
+
+        connection.query(sqlJoin, [postId], (err, postResults) => {
+            if (err) return res.status(500).json({ message: 'Query failed' })
+            console.log(postResults);
+            post.tag = postResults
+    
+            res.json(post)
+        })
+    })
+
+
+/*  //cerco il l'id che mi interessa dentro postData (l'array di oggetti)
     //(post rappresenta ogni elemento dell'array postsData
     //se il post.slug è uguale all'id che mi interessa, allora viene restituito
     const post = postsData.find(post => post.id === postId);
-    res.json(post);
+    res.json(post); */
 }
 
 //store
@@ -85,9 +109,10 @@ function modify(req, res){
 function destroy(req, res){
     const postId = Number(req.params.id);
     const sql = 'DELETE FROM posts WHERE id = ?';
-
+    //accetta 3 parametri: la stringa che rappresenta la query da eseguire, il valore da sostituire nel placeholder ? della query e la callback (la funzione che viene eseguita quando la query è completata -con successo o con errore-)
     connection.query(sql, [postId], (err) => {
         if (err) return res.status(500).json({ error: 'Query failed' })
+            //se va tutto bene, restituisce lo stato 204
         res.sendStatus(204);
     })
 
